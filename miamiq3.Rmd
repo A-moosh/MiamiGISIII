@@ -1,0 +1,35 @@
+---
+title: "Miami_q3"
+author: "Ally M"
+date: "6/4/2021"
+output: html_document
+---
+
+```{r}
+#working directory setup
+library(sf)
+library(sp)
+library(tmap) # for static and interactive maps
+library(tidyverse)
+library(tigris)
+library(rgdal)
+library(raster)
+library(tidyverse)
+library(leaflet) # for interactive maps
+library(ggmap)
+library(raster)
+library(spDataLarge)
+library(dplyr)
+```
+
+```{r}
+
+Miami_shpv <- shapefile("/Users/allymuszynski/Desktop/GIS3FIN/Miami_2/MiamiClean.shp")
+Miami_shpv_sf <- st_as_sf(Miami_shpv)
+Miami_shpv_sf <- Miami_shpv_sf %>% mutate(Pr_Cp_I = ifelse(is.na(Pr_Cp_I),0, Pr_Cp_I) , RWtePerCap = ifelse(is.na(RWtePerCap), 0, RWtePerCap)) 
+Miami_shpv_sf$Pr_Cp_I = as.integer(Miami_shpv_sf$Pr_Cp_I)
+
+Miami_shpv <- as_Spatial(Miami_shpv_sf)
+
+Miami_shpv_sf <- Miami_shpv_sf %>% rename(PCI = Pr_Cp_I)
+```

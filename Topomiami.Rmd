@@ -1,0 +1,69 @@
+---
+title: "topo"
+author: "Ally M"
+date: "6/5/2021"
+output: html_document
+---
+
+```{r}
+library(sf)
+library(sp)
+library(tmap) # for static and interactive maps
+library(tidyverse)
+library(tigris)
+library(rgdal)
+library(raster)
+library(tidyverse)
+library(leaflet) # for interactive maps
+library(ggmap)
+library(raster)
+library(spDataLarge)
+library(dplyr)
+```
+
+```{r}
+Miami_topo <- shapefile("/Users/allymuszynski/Desktop/GIS3FIN/FEMA_Flood_Zone-shp/FEMAFloodZone.shp")
+
+Miami_topo_sf <- st_as_sf(Miami_topo) 
+
+Miami_topo_sf <- Miami_topo_sf %>% dplyr::select(ELEV, SHAPE_Leng, SHAPE_Area, geometry)
+Miami_topo_sf <- Miami_topo_sf %>% subset(ELEV < 7)
+Miami_topo_sf  <- Miami_topo_sf %>% subset(ELEV > -998)
+
+Miami_topo <- as_Spatial(Miami_topo_sf)
+extent(Miami_topo)
+```
+
+
+```{r}
+crs(Miami_shpv)
+# +proj=lcc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45 +x_0=0 +y_0=0
+# +datum=NAD83 +units=m +no_defs
+crs(Miami_topo)
+# +proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0
+# +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs 
+Miami_topo_NAD83 <- spTransform(Miami_topo,
+                                crs(Miami_shpv))
+crs(Miami_topo_NAD83)
+extent(Miami_topo_NAD83)
+extent(Miami_shpv)
+Miami_topo_NAD83_sf <- st_as_sf(Miami_topo_NAD83)
+
+
+```
+
+```{r}
+st_write(Miami_topo_NAD83_sf, "/Users/allymuszynski/Desktop/GIS3FIN/topo/Miamitopo.shp", layer_options = "ENCODING=UTF-8")
+```
+
+```{r}
+elevation_heights <- c(2:6)
+elevation_colors <- c("blue", "red", "orange", "yellow", "green")
+for(h_index in 1:length(elevation_heights)){
+  Miami_topo_NAD83_temp <- Miami_topo_NAD83 %>% subset(ELEV <= elevation_heights[h_index])
+  print(dim(Miami_topo_NAD83_temp))
+  plot(Miami_shpv)
+  plot(Miami_topo_NAD83_temp, col = elevation_colors[h_index], add = T)
+}
+
+```
